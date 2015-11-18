@@ -1,10 +1,13 @@
 package it.jdark.android.example.recycleview;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -16,24 +19,46 @@ import java.util.List;
  */
 public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.RecyclerViewHolder> {
 
+    public static final int LAST_POSITION = -1;
+
+    private Context mContext;
+    private OnItemClickListener mOnItemClickListener;
+    private List<Item> mData;
+
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
         void onButtonClick(View view, int position);
         void onLongClick(View view, int position);
     }
 
-    private OnItemClickListener mOnItemClickListener;
-    private List<Item> items;
 
-    public RecycleViewAdapter(List<Item> items, OnItemClickListener onItemClickListener) {
-        this.items = items;
+    public RecycleViewAdapter(Context context, List<Item> items, OnItemClickListener onItemClickListener) {
+        this.mContext = context;
+        this.mData = items;
         this.mOnItemClickListener = onItemClickListener;
 
     }
 
+    public void add(Item item, int position) {
+        position = position == LAST_POSITION ? getItemCount() : position;
+        mData.add(position, item);
+        notifyItemInserted(position);
+    }
+
+    public void remove(int position) {
+        if (position == LAST_POSITION && getItemCount() > 0) {
+            position = getItemCount() -1;
+        }
+        if (position > LAST_POSITION && position < getItemCount()) {
+            mData.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+
     @Override
     public RecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Log.d("RecyclingTest","onCreateViewHolder method is called");
+        Log.d("RecyclingTest", "onCreateViewHolder method is called");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_row, null);
         RecyclerViewHolder viewHolder = new RecyclerViewHolder(view);
         return viewHolder;
@@ -42,9 +67,9 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
     @Override
     public void onBindViewHolder(RecyclerViewHolder holder, final int position) {
         Log.d("RecyclingTest", "onBindViewHolder method is called");
-        holder.name.setText(items.get(position).getName());
-        holder.surName.setText(items.get(position).getSurName());
-        holder.status.setText(items.get(position).isStatus()+"");
+        holder.name.setText(mData.get(position).getName());
+        holder.surName.setText(mData.get(position).getSurName());
+        holder.status.setText(mData.get(position).isStatus() + "");
 
         // Declare the listener (CLick and LongClick) for the single element of the RecycleView
         holder.row.setOnClickListener(new View.OnClickListener() {
@@ -61,7 +86,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
             }
         });
         // Declare the listener for the click on the button of the single element of the RecycleView
-        if (items.get(position).isStatus()) {
+        if (mData.get(position).isStatus()) {
             holder.status.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -69,13 +94,28 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
                 }
             });
         }
+        setAnimation(holder.row,position);
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return mData.size();
     }
 
+
+    /**
+     * Here is the key method to apply the animation
+     */
+    private void setAnimation(View viewToAnimate, int position)
+    {
+        // If the bound view wasn't previously displayed on screen, it's animated
+        if (position > LAST_POSITION)
+        {
+            Animation animation = AnimationUtils.loadAnimation(mContext, android.R.anim.slide_in_left);
+            viewToAnimate.startAnimation(animation);
+//            LAST_POSITION = position;
+        }
+    }
 
     public class RecyclerViewHolder extends RecyclerView.ViewHolder {
 
