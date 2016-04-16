@@ -4,14 +4,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.List;
+
+import butterknife.ButterKnife;
+import butterknife.OnItemSelected;
 
 public class MainActivity extends AppCompatActivity implements RecycleViewAdapter.OnItemClickListener {
 
@@ -27,16 +33,14 @@ public class MainActivity extends AppCompatActivity implements RecycleViewAdapte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        spinner = (Spinner) findViewById(R.id.spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.animators, android.R.layout.simple_spinner_dropdown_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        ButterKnife.bind(this);
+
+        spinnerInit();
 
         items = Item.createItemList(10);
 
         mRecycleView= (RecyclerView) findViewById(R.id.recycleView);
         mRecycleView.setHasFixedSize(true);
-
 
         mLayoutManager = new LinearLayoutManager(this);
         mRecycleView.setLayoutManager(mLayoutManager);
@@ -50,11 +54,42 @@ public class MainActivity extends AppCompatActivity implements RecycleViewAdapte
         // Auto-Scroll to a specific position
         mLayoutManager.smoothScrollToPosition(mRecycleView, null, 20);    // Set auto-scroll to that position
 
+    }
 
+//    @OnItemSelected(R.id.spinner)
+//    void onItemSelected(int position) {
+//        switch (position) {
+//            case 0: mRecycleView.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
+//            case 1: mRecycleView.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right));
+//        }
+//        Toast.makeText(this, "Selected position " + position + "!", Toast.LENGTH_SHORT).show();
+//    }
+
+    private void spinnerInit() {
+        spinner = (Spinner) findViewById(R.id.spinner);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.animators, android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0:
+                        mRecycleView.setAnimation(AnimationUtils.loadAnimation(parent.getContext(), android.R.anim.slide_in_left));
+                    case 1:
+                        mRecycleView.setAnimation(AnimationUtils.loadAnimation(parent.getContext(), android.R.anim.slide_out_right));
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 
     @Override
     public void onItemClick(View view, int position) {
+//        Log.w("PROVA", "--- " + ((Item)view.getTag(-1)).getName());
         Toast.makeText(view.getContext(), "You got a call from ELEMENT at position "+position+"\n"+items.get(position).getName(), Toast.LENGTH_SHORT).show();
     }
 

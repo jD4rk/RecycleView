@@ -60,8 +60,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
     public RecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Log.d("RecyclingTest", "onCreateViewHolder method is called");
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_row, null);
-        RecyclerViewHolder viewHolder = new RecyclerViewHolder(view);
-        return viewHolder;
+        return new RecyclerViewHolder(view);
     }
 
     @Override
@@ -70,6 +69,8 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
         holder.name.setText(mData.get(position).getName());
         holder.surName.setText(mData.get(position).getSurName());
         holder.status.setText(mData.get(position).isStatus() + "");
+        holder.row.setTag(-1, mData.get(position));
+
 
         // Declare the listener (CLick and LongClick) for the single element of the RecycleView
         holder.row.setOnClickListener(new View.OnClickListener() {
@@ -94,7 +95,7 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
                 }
             });
         }
-        setAnimation(holder.row,position);
+//        setAnimation(holder.row,position);
     }
 
     @Override
@@ -113,7 +114,6 @@ public class RecycleViewAdapter extends RecyclerView.Adapter<RecycleViewAdapter.
         {
             Animation animation = AnimationUtils.loadAnimation(mContext, android.R.anim.slide_in_left);
             viewToAnimate.startAnimation(animation);
-//            LAST_POSITION = position;
         }
     }
 
